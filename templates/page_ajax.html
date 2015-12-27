@@ -1,0 +1,140 @@
+<div class="row">
+	<div class="col-xs-12 text-center">
+		<h4> {{chapter_title}} </h4>
+	</div>
+</div>
+<div class="row">
+	<div class="col-xs-4 text-left">
+		<nav>
+			<ul class="pagination">
+				{% if page_number > 1 %}
+				<li class="active">
+					<a class="last" aria-label="Previous">
+						<span aria-hidden="true">&laquo;</span>
+					</a>
+				</li>
+				{% endif %}
+			</ul>
+		</nav>
+	</div>
+	<div class="col-xs-4 page_number text-center">
+		Page {{page_number}}
+	</div>
+	<div class="col-xs-4 text-right">
+		<nav>
+			<ul class="pagination">
+				{% if page_number < num_pages %}
+				<li class="active">
+					<a class="next" aria-label="Previous">
+						<span aria-hidden="true">&raquo;</span>
+					</a>
+				</li>
+				{% endif %}
+			</ul>
+		</nav>
+	</div>
+</div>
+<div class="row">
+	<div class="col-6">
+	{% for line in page %}
+		<p>
+		{% for word in line %}
+			<a class="word" isword="true"> {{ word }} </a>
+		{% endfor %}
+		</p>
+	{% endfor %}
+	</div>
+</div>
+<div class="row">
+	<div class="col-xs-6 text-left">
+		<nav>
+			<ul class="pagination">
+			{% if page_number > 1 %}
+				<li class="active">
+					<a class="last" aria-label="Previous">
+						<span aria-hidden="true">&laquo;</span>
+					</a>
+				</li>
+			{% endif %}
+			</ul>
+		</nav>
+	</div>
+	<div class="col-xs-6 text-right">
+		<nav>
+			<ul class="pagination">
+				{% if page_number < num_pages %}
+				<li class="active">
+					<a class="next" aria-label="Previous">
+						<span aria-hidden="true">&raquo;</span>
+					</a>
+				</li>
+				{% endif %}
+			</ul>
+		</nav>
+	</div>
+</div>
+<div class="row">
+	<div class="col-xs-12 text-center page_number">
+		Page {{page_number}}
+	</div>
+</div>
+<script type="text/javascript" id="script">
+	$(".word").click(function(){
+		$.post("/ulysses/search?word=" + $(this).text(), function(data, status){
+			document.getElementById("search-results").innerHTML = data;
+			$(".result").click(function(){
+				console.log("here");
+				$.post("/ulysses/page?page_number=" + this.getAttribute("page"), function(data, status){
+					console.log(data);
+					document.getElementById("page").innerHTML = data;
+					eval(document.getElementById("script").innerHTML);
+				});
+			});
+			eval(document.getElementById("script2").innerHTML);
+			var search_word = document.getElementById("script2").getAttribute("term");
+			$(".word").each(function(index) {
+				if(this.innerHTML.replace(/[^a-zA-Z0-9]/g,"").toLowerCase() === search_word) {
+					
+					this.style.backgroundColor="lightgray";
+				}
+				else {
+					this.style.backgroundColor="transparent";
+				}
+			});
+		});
+	});
+	$(".next").click(function(){
+		$.post("/ulysses/page?page_number={{page_number + 1}}", function(data, status){
+			document.getElementById("page").innerHTML = data;
+			eval(document.getElementById("script").innerHTML);
+			eval(document.getElementById("script2").innerHTML);
+			var search_word = document.getElementById("script2").getAttribute("term");
+			$(".word").each(function(index) {
+				if(this.innerHTML.replace(/[^a-zA-Z0-9]/g,"").toLowerCase() === search_word) {
+					
+					this.style.backgroundColor="lightgray";
+				}
+				else {
+					this.style.backgroundColor="transparent";
+				}
+			});
+		})
+	})
+	$(".last").click(function(){
+		$.post("/ulysses/page?page_number={{page_number - 1}}", function(data, status){
+			document.getElementById("page").innerHTML = data;
+			eval(document.getElementById("script").innerHTML);
+			eval(document.getElementById("script2").innerHTML);
+			var search_word = document.getElementById("script2").getAttribute("term");
+			$(".word").each(function(index) {
+				if(this.innerHTML.replace(/[^a-zA-Z0-9]/g,"").toLowerCase() === search_word) {
+					
+					this.style.backgroundColor="lightgray";
+				}
+				else {
+					this.style.backgroundColor="transparent";
+				}
+			});
+		})
+	})
+</script>

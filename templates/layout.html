@@ -1,0 +1,68 @@
+<html>
+    <head>
+        {% block head %}
+        <title>{% block title %} {% endblock %}</title>
+        
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+
+        <!-- jQuery library -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+        <!-- Latest compiled JavaScript -->
+        <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="/static/ulysses.css" media="screen" title="no title" charset="utf-8">
+        {% endblock %}
+    </head>
+    <body>
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+            <div class="container top">
+                <div class="btn-group pull-right">
+                    <button type="button" class="btn btn-default">
+                        <a class="button-link" href="/ulysses">Home</a>
+                    </button>
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Chapters
+                      <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                    {% for chapter in chapters %}
+                        <li><a class="chapter-dropdown" line-number-chapter="{{chapter[1]}}">
+                            {{ chapter[0] }}
+                        </a></li>
+                    {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="filler"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="jumbotron">
+                    <h1> 
+                        Ulysses
+                    </h1>
+                    <h4>
+                        James Joyce
+                    </h4>
+                </div>
+            </div>
+        </div>
+        {% block body %}
+        {% endblock %}
+        <div class="row">
+            <div class="col-12 text-center">
+                <footer>
+                    <h6>
+                        Hyptertext Ulysses
+                    </h6>
+                </footer>
+            </div>
+        </div>
+    </body>
+</html>
