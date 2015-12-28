@@ -62,13 +62,9 @@ def ulysses_search():
 		abort(404)
 	word = clean_up_query(request.args.get('word'))
 	cursor, mysql_connection = db_connect()
-	query = "SELECT line_number FROM ulysses.exact WHERE word='" + word + "';"
+	query = "SELECT line_number, page_number, chapter FROM ulysses.exact WHERE word='" + word + "';"
 	cursor.execute(query)
-	result_line_numbers = [result[0] for result in cursor.fetchall()]
-	result_lines = [" ".join(ulysses[i]) for i in result_line_numbers]
-	result_pages = [line_number / 50 + 1 for line_number in result_line_numbers]
-	result_chapters = [get_chapter(line_number) for line_number in result_line_numbers]
-	results = zip(result_line_numbers, result_lines, result_pages, result_chapters)
+	results = [(result[0], " ".join(ulysses[result[0]]), result[1], result[2]) for result in cursor.fetchall()]
 	return render_template('search_ajax.html', word=word, results=results, num_results=len(results), chapters=chapters)
 
 

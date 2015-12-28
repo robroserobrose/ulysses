@@ -3,7 +3,9 @@ CREATE DATABASE ulysses;
 
 CREATE TABLE ulysses.exact (
 	word varchar(100),
-	line_number int
+	line_number int,
+	page_number int,
+	chapter varchar(100)
 );
 
 CREATE TABLE ulysses.chapters (
