@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, abort
+from flask import Flask, request, render_template, abort, make_response, jsonify
 import MySQLdb
 import re
 
@@ -65,7 +65,8 @@ def ulysses_search():
 	query = "SELECT line_number, page_number, chapter FROM ulysses.exact WHERE word='" + word + "';"
 	cursor.execute(query)
 	results = [(result[0], " ".join(ulysses[result[0]]), result[1], result[2]) for result in cursor.fetchall()]
-	return render_template('search_ajax.html', word=word, results=results, num_results=len(results), chapters=chapters)
+	# return render_template('search_ajax.html', word=word, results=results, num_results=len(results), chapters=chapters)
+	return make_response(jsonify(word=word, results=results))
 
 
 if __name__ == "__main__":

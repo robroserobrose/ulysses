@@ -11,65 +11,110 @@ function highlight_word() {
 	});
 }
 
-function on_new_page() {
-	$(".word").click(function(){
-		$.post("/ulysses/search?word=" + $(this).text(), function(data, status){
-			document.getElementById("search-results").innerHTML = data;
-			$(".result").click(function(){
-				$.post("/ulysses/page?page_number=" + this.getAttribute("page"), function(data, status){
-					document.getElementById("page").innerHTML = data;
-					on_new_page();
-				});
-			});
-			on_new_search();
-			highlight_word();
+function search_callback(data, status){
+	$("#searchrow1").html("<div class=\"col-12\"><h2><small> Showing results for: " + data.word + "</small><h5>" + data.results.length + "</h5></h2></div>");
+	$("#results-table").attr("term", data.word);
+	var results_table = "<div class=\" col-6 \"><table class=\" table table-fixed affix-top \"><thead><tr><th class=\" col-xs-3 chapter \">Chapter</th><th class=\" col-xs-3 line-number \">Line</th><th class=\" col-xs-6 line \"></th></tr></thead><tbody>";
+	/*
+		<div class="row" id="results-table" term="{{word}}">
+			<div class="col-6">
+				<table class="table table-fixed affix-top">
+					<thead>
+					<tr>
+						<th class="col-xs-3 chapter">
+							Chapter
+						</th>
+						<th class="col-xs-3 line-number">
+							Line
+						</th>
+						<th class="col-xs-6 line">
+						</th>
+					</tr>
+					</thead>
+					<tbody>
+	*/
+	data.results.forEach(function(entry) {
+		results_table += "<tr><td class=\" col-xs-3 chapter \">" + entry[3] + "</td><td class=\" col-xs-3 line-number \"><a class=\" result \" page= \"" + entry[2] + " \">" + entry[0] + "</a></td><td class=\" col-xs-6 line \">" + entry[1] + "</td></tr>";
+	/*
+						<tr>
+							<td class="col-xs-3 chapter">
+								{{ entry[3] }}
+							</td>
+							<td class="col-xs-3 line-number">
+								<a class="result" page="{{entry[2]}}"> 
+									{{ entry[0] }} 
+								</a>
+							</td>
+							<td class="col-xs-6 line">
+								{{ entry[1] }}
+							</td>
+						</tr>
+	*/
+	});
+	results_table += "</tbody></table></div>";
+	/*
+					</tbody>
+				</table>
+			</div>
+	*/
+	$("#results-table").html(results_table);
+	//document.getElementById("search-results").innerHTML = data;
+	$(".result").click(function(){
+		$.post("/ulysses/page?page_number=" + this.getAttribute("page"), function(data, status){
+			$("#page").html(data);
+			on_new_page();
 		});
 	});
+	//on_search();
+	highlight_word();
+}
+
+function on_new_page() {
+	$(".word").off("click");
+	$(".next").off("click");
+	$(".last").off("click");
+	$(".word").click(function(){
+		console.log("word clicked");
+		$.post("/ulysses/search?word=" + $(this).text().replace(/[^a-zA-Z0-9]/g,""), search_callback);
+	});
 	$(".next").click(function(){
-		$.post("/ulysses/page?page_number={{page_number + 1}}", function(data, status){
-			document.getElementById("page").innerHTML = data;
+		$.post("/ulysses/page?page_number=" + (parseInt($("#page-number").attr("page")) + 1), function(data, status){
+			$("#page").html(data);
 			on_new_page();
-			on_new_search();
+			//on_search();
 			highlight_word();
 		})
 	});
 	$(".last").click(function(){
-		$.post("/ulysses/page?page_number={{page_number - 1}}", function(data, status){
-			document.getElementById("page").innerHTML = data;
+		$.post("/ulysses/page?page_number=" + (parseInt($("#page-number").attr("page")) - 1), function(data, status){
+			$("#page").html(data);
 			on_new_page();
-			on_new_search();
+			//on_search();
 			highlight_word();
 		})
 	});
 }
 
-function on_new_search() {
+function on_search() {
 	$(".result").click(function(){
+		console.log("click");
 		$.post("/ulysses/page?page_number=" + this.getAttribute("page"), function(data, status){
-			document.getElementById("page").innerHTML = data;
+			$("#page").html(data);
 			on_new_page();
 			highlight_word();
 		});
 	});
 	$("#search-btn").click(function(){
-		$.post("/ulysses/search?word=" + $("#search-box").val(), function(data, status){
-			document.getElementById("search-results").innerHTML = data;
-			$(".result").click(function(){
-				$.post("/ulysses/page?page_number=" + this.getAttribute("page"), function(data, status){
-					document.getElementById("page").innerHTML = data;
-					on_new_page();
-				});
-			});
-			on_new_search();
-			highlight_word();
-		});
+		console.log("search btn clicked");
+		$.post("/ulysses/search?word=" + $("#search-box").val().replace(/[^a-zA-Z0-9]/g,""), search_callback);
 	});
 	$("#search-box").keyup(function(){
-		if(event.which === 13 && $("#search-box").val() !== "") {
+		console.log("button");
+		if(event.which === 13 && $("#search-box").val().replace(/[^a-zA-Z0-9]/g,"").toLowerCase() !== "") {
 			$("#search-btn").click();
 		}
 	});
 }
 
 on_new_page();
-on_new_search();
+on_search();
