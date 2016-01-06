@@ -1,7 +1,8 @@
 function highlight_word() {
 	var search_word = document.getElementById("results-table").getAttribute("term");
+	console.log(search_word);
 	$(".word").each(function(index) {
-		if(this.innerHTML.replace(/[^a-zA-Z0-9]/g,"").toLowerCase() === search_word) {
+		if(this.innerHTML.replace(/[^a-zA-Z0-9]/g,"").toLowerCase() === search_word && search_word !== "") {
 			
 			this.style.backgroundColor="lightgray";
 		}
@@ -12,6 +13,7 @@ function highlight_word() {
 }
 
 function search_callback(data, status){
+	console.log("response received");
 	$("#searchrow1").html("<div class=\"col-12\"><h2><small> Showing results for: " + data.word + "</small><h5>" + data.results.length + "</h5></h2></div>");
 	$("#results-table").attr("term", data.word);
 	var results_table = "<div class=\" col-6 \"><table class=\" table table-fixed affix-top \"><thead><tr><th class=\" col-xs-3 chapter \">Chapter</th><th class=\" col-xs-3 line-number \">Line</th><th class=\" col-xs-6 line \"></th></tr></thead><tbody>";
@@ -63,6 +65,7 @@ function search_callback(data, status){
 		$.post("/ulysses/page?page_number=" + this.getAttribute("page"), function(data, status){
 			$("#page").html(data);
 			on_new_page();
+			highlight_word();
 		});
 	});
 	//on_search();
@@ -74,8 +77,10 @@ function on_new_page() {
 	$(".next").off("click");
 	$(".last").off("click");
 	$(".word").click(function(){
-		console.log("word clicked");
-		$.post("/ulysses/search?word=" + $(this).text().replace(/[^a-zA-Z0-9]/g,""), search_callback);
+		var word = $(this).text().replace(/[^a-zA-Z0-9]/g,"");
+		if(word !== ""){
+			$.post("/ulysses/search?word=" + word, search_callback);
+		}
 	});
 	$(".next").click(function(){
 		$.post("/ulysses/page?page_number=" + (parseInt($("#page-number").attr("page")) + 1), function(data, status){
