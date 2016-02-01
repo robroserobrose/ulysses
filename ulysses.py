@@ -1,4 +1,5 @@
 from flask import Flask, request, render_template, abort, make_response, jsonify
+from flask.ext.compress import Compress
 import MySQLdb
 import re
 
@@ -21,6 +22,7 @@ chapters = get_all_chapters()
 num_pages = len(ulysses) / 50 + 1
 
 app = Flask(__name__)
+Compress(app)
 
 def clean_up_query(query):
     query = query.lower()
@@ -66,11 +68,11 @@ def ulysses_search():
     query = "SELECT line_number, page_number, chapter FROM ulysses.exact WHERE word='" + word + "';"
     cursor.execute(query)
     fetched = cursor.fetchall()
-    to_respond = fetched[index*1000:(index+1)*200]
+    to_respond = fetched[index*500:(index+1)*500]
     results = [(result[0], " ".join(ulysses[result[0]]), result[1], result[2]) for result in to_respond]
     # return render_template('search_ajax.html', word=word, results=results, num_results=len(results), chapters=chapters)
     new_index = index + 1
-    is_done = 1000*(index + 1) >= len(fetched)
+    is_done = 500*(index + 1) >= len(fetched)
     return make_response(jsonify(word=word, results=results, new_index=new_index, num_results=len(fetched), is_done=is_done))
 
 
