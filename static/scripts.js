@@ -69,7 +69,7 @@ function search_callback(data, status){
     if(data.new_index == 1) {
         $("#results-table").html(results_table);
     }
-    else{
+    else if ($("#results-table").attr("term") == data.word){
         $("#results-table-body").append(results_table);
     }
 	//document.getElementById("search-results").innerHTML = data;
