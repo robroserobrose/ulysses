@@ -58,15 +58,20 @@ def ulysses_page():
 
 @app.route("/ulysses/search", methods=['POST'])
 def ulysses_search():
-	if 'word' not in request.args:
-		abort(404)
-	word = clean_up_query(request.args.get('word'))
-	cursor, mysql_connection = db_connect()
-	query = "SELECT line_number, page_number, chapter FROM ulysses.exact WHERE word='" + word + "';"
-	cursor.execute(query)
-	results = [(result[0], " ".join(ulysses[result[0]]), result[1], result[2]) for result in cursor.fetchall()]
+    if 'word' not in request.args or 'index' not in request.args:
+        abort(404)
+    word = clean_up_query(request.args.get('word'))
+    index = int(request.args.get('index'))
+    cursor, mysql_connection = db_connect()
+    query = "SELECT line_number, page_number, chapter FROM ulysses.exact WHERE word='" + word + "';"
+    cursor.execute(query)
+    fetched = cursor.fetchall()
+    to_respond = fetched[index*1000:(index+1)*200]
+    results = [(result[0], " ".join(ulysses[result[0]]), result[1], result[2]) for result in to_respond]
 	# return render_template('search_ajax.html', word=word, results=results, num_results=len(results), chapters=chapters)
-	return make_response(jsonify(word=word, results=results))
+    new_index = index + 1
+    is_done = 1000*(index + 1) >= len(fetched)
+    return make_response(jsonify(word=word, results=results, new_index=new_index, num_results=len(fetched), is_done=is_done))
 
 
 if __name__ == "__main__":
