@@ -14,9 +14,14 @@ function highlight_word() {
 
 function search_callback(data, status){
 	console.log("response received");
-	$("#searchrow1").html("<div class=\"col-12\"><h2><small> Showing results for: " + data.word + "</small><h5>" + data.results.length + "</h5></h2></div>");
-	$("#results-table").attr("term", data.word);
-	var results_table = "<div class=\" col-6 \"><table class=\" table table-fixed affix-top \"><thead><tr><th class=\" col-xs-3 chapter \">Chapter</th><th class=\" col-xs-3 line-number \">Line</th><th class=\" col-xs-6 line \"></th></tr></thead><tbody>";
+    if (data.new_index==1) {
+        $("#searchrow1").html("<div class=\"col-12\"><h2><small> Showing results for: " + data.word + "</small><h5>" + data.num_results + "</h5></h2></div>");
+        $("#results-table").attr("term", data.word);
+        var results_table = "<div class=\" col-6 \"><table class=\" table table-fixed affix-top \"><thead><tr><th class=\" col-xs-3 chapter \">Chapter</th><th class=\" col-xs-3 line-number \">Line</th><th class=\" col-xs-6 line \"></th></tr></thead><tbody id=\"results-table-body\">";
+    }
+    else {
+        var results_table = "";
+    }
 	/*
 		<div class="row" id="results-table" term="{{word}}">
 			<div class="col-6">
@@ -53,13 +58,20 @@ function search_callback(data, status){
 						</tr>
 	*/
 	});
-	results_table += "</tbody></table></div>";
+    if(data.new_index == 1) {
+        results_table += "</tbody></table></div>";
+    }
 	/*
 					</tbody>
 				</table>
 			</div>
 	*/
-	$("#results-table").html(results_table);
+    if(data.new_index == 1) {
+        $("#results-table").html(results_table);
+    }
+    else{
+        $("#results-table-body").append(results_table);
+    }
 	//document.getElementById("search-results").innerHTML = data;
 	$(".result").click(function(){
 		$.post("/ulysses/page?page_number=" + this.getAttribute("page"), function(data, status){
@@ -68,8 +80,13 @@ function search_callback(data, status){
 			highlight_word();
 		});
 	});
+    if(data.is_done == false && $("#results-table").attr("term") == data.word){
+        $.post("/ulysses/search?word=" + data.word + "&index=" + data.new_index ,search_callback);
+    }
 	//on_search();
-	highlight_word();
+    if(data.new_index == 1){
+        highlight_word();
+    }
 }
 
 function on_new_page() {
@@ -79,7 +96,7 @@ function on_new_page() {
 	$(".word").click(function(){
 		var word = $(this).text().replace(/[^a-zA-Z0-9]/g,"");
 		if(word !== ""){
-			$.post("/ulysses/search?word=" + word, search_callback);
+			$.post("/ulysses/search?word=" + word + "&index=0", search_callback);
 		}
 	});
 	$(".next").click(function(){
@@ -88,7 +105,7 @@ function on_new_page() {
 			on_new_page();
 			//on_search();
 			highlight_word();
-		})
+		});
 	});
 	$(".last").click(function(){
 		$.post("/ulysses/page?page_number=" + (parseInt($("#page-number").attr("page")) - 1), function(data, status){
@@ -96,7 +113,14 @@ function on_new_page() {
 			on_new_page();
 			//on_search();
 			highlight_word();
-		})
+		});
+	});
+	$(".chapter-dropdown").click(function(){
+		$.post("/ulysses/page?page_number="+this.getAttribute("line-number-chapter"), function(data, status){
+			$("#page").html(data);
+			on_new_page();
+			highlight_word();
+		});
 	});
 }
 
@@ -111,14 +135,26 @@ function on_search() {
 	});
 	$("#search-btn").click(function(){
 		console.log("search btn clicked");
-		$.post("/ulysses/search?word=" + $("#search-box").val().replace(/[^a-zA-Z0-9]/g,""), search_callback);
+		$.post("/ulysses/search?word=" + $("#search-box").val().replace(/[^a-zA-Z0-9]/g,"") + "&index=0", search_callback);
 	});
 	$("#search-box").keyup(function(){
 		console.log("button");
-		if(event.which === 13 && $("#search-box").val().replace(/[^a-zA-Z0-9]/g,"").toLowerCase() !== "") {
-			$("#search-btn").click();
-		}
+		$.post("/ulysses/page?page_number=" + this.getAttribute("page"), function(data, status){
+			$("#page").html(data);
+			on_new_page();
+			highlight_word();
+		});
 	});
+	$("#search-btn").click(function(){
+		console.log("search btn clicked");
+    })
+
+    $("#search-box").keyup(function(){
+        console.log("button");
+        if(event.which === 13 && $("#search-box").val().replace(/[^a-zA-Z0-9]/g,"").toLowerCase() !== "") {
+            $("#search-btn").click();
+        }
+    });
 }
 
 on_new_page();
