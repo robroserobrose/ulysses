@@ -22,7 +22,7 @@ a[isword="true"] {
 	padding: 0px 0px 0px 0px;
 }
 
-a[isword="true"]:hover, a.result:hover, a.chapter-dropdown:hover {
+a[isword="true"]:hover, a.result:hover, a.chapter-dropdown:hover, .pagination>.active>a.last:hover, .pagination>.active>a.next:hover {
 	cursor: pointer;
 }
 
@@ -80,6 +80,10 @@ table[id="top-bar"] td {
 
 .btn-group {
 	padding: 5px
+}
+
+.next, .last {
+    cursor: pointer
 }
 
 button > a {
