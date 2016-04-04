@@ -91,11 +91,10 @@ fill_table_chapter conn chapter = do
 
 fill_tables :: IO ()
 fill_tables = do
-    create_table <- readFile "create_ulysses_tables.sql"
     raw_text <- readFile "ulyss12.txt"
     let book = parse_book raw_text
     conn <- connect connectInfo
-    _ <- autocommit conn False
+    _ <- autocommit conn False                  -- wait to commit changes until end
     _ <- execute_ conn drop_database
     _ <- execute_ conn create_database
     _ <- execute_ conn create_chapters_table
